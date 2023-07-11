@@ -46,8 +46,7 @@ def fused_bn_relu(data: te.Tensor, mean: te.Tensor, var: te.Tensor, gamma: te.Te
 
     return fused_bn_relu
 
-
-#reshape对应不同层间的数据整理，应交由加速器相应硬件去做，这里不代表实际数据排布情况
+#reshape对应不同层间的数据整理，应交由加速器相应硬件去做，这里不代表实际数据排布情况，只用于说明数据排布会有转换
 def reshape(data: te.Tensor, next_kernel_size: tuple):
     assert len(data.shape) == 2, "The input data should be 2-D"
     height, width = data.shape
@@ -164,6 +163,11 @@ matmul = [layer0_matmul, layer1_matmul, layer2_matmul, shortcut_matmul]
 bn = [layer0_bn, layer1_bn, layer2_bn, shortcut_bn]
 relu = [layer0_relu, layer1_relu, output]
 
+#保存拆分后的axis，以便于进行算子融合
+matmul_axis = []
+bn_axis = []
+relu_axis = []
+
 #拆分matmul
 for x in range(4):
     matmul_op = matmul[x].op
@@ -175,6 +179,7 @@ for x in range(4):
     #sch[x].tile(n, m, 16, 16)
     ko, ki = sch[matmul[x]].split(k, factor=16)
     #sch[matmul[x]].reorder(no, mo, ko, ni, mi, ki)
+    matmul_axis.append(mo)
 
 #拆分bn
 for x in range(4):
@@ -185,24 +190,36 @@ for x in range(4):
     mo, mi = sch[bn[x]].split(m, factor=16)
     #sch[bn[x]].reorder(no, mo, ni, mi)
     #sch[x].tile(n, m, 16, 16)
+    bn_axis.append(mo)
 
 #拆分relu
 for x in range(3):
     relu_op = relu[x].op
     n, m = relu_op.axis
-
+    
     no, ni = sch[relu[x]].split(n, factor=16)
     mo, mi = sch[relu[x]].split(m, factor=16)
     #sch[relu[x]].reorder(no, mo, ni, mi)
+    relu_axis.append(mo)
     
 #最后一层的加法拆分
 n, m = output_add.op.axis
-no, ni = sch[output_add].split(n, factor=16)
-mo, mi = sch[output_add].split(m, factor=16)
+no_, ni_ = sch[output_add].split(n, factor=16)
+mo_, mi_ = sch[output_add].split(m, factor=16)
 #sch[output_add].reorder(no, mo, ni, mi)
 
+#算子融合
+#bn和matmul融合
+for i in range(4):
+    sch[matmul[i]].compute_at(sch[bn[i]], bn_axis[i])
 
-#sch[layer0_relu].compute_at(sch[layer0_bn], layer0_bn.op.axis[0])
+#bn和relu算子融合
+for i in range(2):
+    sch[bn[i]].compute_at(sch[relu[i]], relu_axis[i])
+
+#shortcut层后的单独处理
+sch[shortcut_bn].compute_at(sch[output_add], mo_)
+sch[output_add].compute_at(sch[output], relu_axis[2])
 
 print(tvm.lower(sch, [input, weights_0, weights_1, weights_2, weights_shortcut,
                       mean_0, mean_1, mean_2, mean_shortcut,
