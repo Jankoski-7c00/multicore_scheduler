@@ -28,8 +28,8 @@ class Module:
             for j_inner in range(9):
                 relu_2[i_outer * 144 + i_inner * 9 + j_inner] = T.max(matmul_2[j_inner], T.float32(0))
         compute_1 = T.Buffer((1806336,), data=compute)
-        for i, j in T.grid(3136, 576):
-            compute_1[i * 576 + j] = relu_2[i * 9 + j % 9]
+        for i_outer, i_inner, j_outer, j_inner in T.grid(196, 16, 36, 16):
+            compute_1[i_outer * 9216 + i_inner * 576 + j_outer * 16 + j_inner] = relu_2[i_outer * 144 + i_inner * 9 + (j_outer * 7 + j_inner) % 9]
         relu_3 = T.Buffer((200704,), data=relu_1)
         for i_outer, i_inner, j_outer in T.grid(196, 16, 4):
             matmul_1 = T.Buffer((16,), data=matmul)

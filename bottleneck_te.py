@@ -196,7 +196,7 @@ for x in range(4):
 for x in range(3):
     relu_op = relu[x].op
     n, m = relu_op.axis
-    
+
     no, ni = sch[relu[x]].split(n, factor=16)
     mo, mi = sch[relu[x]].split(m, factor=16)
     #sch[relu[x]].reorder(no, mo, ni, mi)
@@ -208,6 +208,11 @@ no_, ni_ = sch[output_add].split(n, factor=16)
 mo_, mi_ = sch[output_add].split(m, factor=16)
 #sch[output_add].reorder(no, mo, ni, mi)
 
+#reshape拆分
+n, m = layer1.op.axis
+no_1, ni_1 = sch[layer1].split(n, factor=16)
+mo_1, mi_1 = sch[layer1].split(m, factor=16)
+
 #算子融合
 #bn和matmul融合
 for i in range(4):
@@ -217,8 +222,15 @@ for i in range(4):
 for i in range(2):
     sch[bn[i]].compute_at(sch[relu[i]], relu_axis[i])
 
+
+#inter layer fusion
+sch[layer0_relu].compute_at(sch[layer1], mo_1)
+sch[layer1].compute_at(sch[layer1_matmul], matmul_axis[1])
+sch[layer1_relu].compute_at(sch[layer2_matmul], matmul_axis[2])
+
 #shortcut层后的单独处理
 sch[shortcut_bn].compute_at(sch[output_add], mo_)
+sch[layer2_bn].compute_at(sch[output_add], mo_)
 sch[output_add].compute_at(sch[output], relu_axis[2])
 
 print(tvm.lower(sch, [input, weights_0, weights_1, weights_2, weights_shortcut,
