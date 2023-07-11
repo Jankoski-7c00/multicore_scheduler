@@ -238,4 +238,3 @@ print(tvm.lower(sch, [input, weights_0, weights_1, weights_2, weights_shortcut,
                       var_0, var_1, var_2, var_shortcut,
                       gamma_0, gamma_1, gamma_2, gamma_shortcut,
                       beta_0, beta_1, beta_2, beta_shortcut, output], simple_mode = True))
-
