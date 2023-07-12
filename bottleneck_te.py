@@ -56,23 +56,23 @@ weights_shortcut = te.placeholder(shape = (64, 256), name = "weights_shortcut")
 
 mean_0 = te.placeholder(shape = (64,), name = "mean_0")
 mean_1 = te.placeholder(shape = (64,), name = "mean_1")
-mean_2 = te.placeholder(shape = (64,), name = "mean_2")
-mean_shortcut = te.placeholder(shape = (64,), name = "mean_shortcut")
+mean_2 = te.placeholder(shape = (256,), name = "mean_2")
+mean_shortcut = te.placeholder(shape = (256,), name = "mean_shortcut")
 
 var_0 = te.placeholder(shape = (64,), name = "var_0")
 var_1 = te.placeholder(shape = (64,), name = "var_1")
-var_2 = te.placeholder(shape = (64,), name = "var_2")
-var_shortcut = te.placeholder(shape = (64,), name = "var_shortcut")
+var_2 = te.placeholder(shape = (256,), name = "var_2")
+var_shortcut = te.placeholder(shape = (256,), name = "var_shortcut")
 
 gamma_0 = te.placeholder(shape = (64,), name = "gamma_0")
 gamma_1 = te.placeholder(shape = (64,), name = "gamma_1")
-gamma_2 = te.placeholder(shape = (64,), name = "gamma_2")
-gamma_shortcut = te.placeholder(shape = (64,), name = "gamma_shortcut")
+gamma_2 = te.placeholder(shape = (256,), name = "gamma_2")
+gamma_shortcut = te.placeholder(shape = (256,), name = "gamma_shortcut")
 
 beta_0 = te.placeholder(shape = (64,), name = "beta_0")
 beta_1 = te.placeholder(shape = (64,), name = "beta_1")
-beta_2 = te.placeholder(shape = (64,), name = "beta_2")
-beta_shortcut = te.placeholder(shape = (64,), name = "beta_shortcut")
+beta_2 = te.placeholder(shape = (256,), name = "beta_2")
+beta_shortcut = te.placeholder(shape = (256,), name = "beta_shortcut")
 
 #layer0
 layer0_matmul = matmul(input, weights_0)

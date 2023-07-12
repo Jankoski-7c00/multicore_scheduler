@@ -4,7 +4,7 @@ from tvm.script import tir as T
 @I.ir_module
 class Module:
     @T.prim_func
-    def main(input: T.Buffer((3136, 64), "float32"), weights_0: T.Buffer((64, 64), "float32"), weights_1: T.Buffer((576, 64), "float32"), weights_2: T.Buffer((64, 256), "float32"), weights_shortcut: T.Buffer((64, 256), "float32"), mean_0: T.Buffer((64,), "float32"), mean_1: T.Buffer((64,), "float32"), mean_2: T.Buffer((64,), "float32"), mean_shortcut: T.Buffer((64,), "float32"), var_0: T.Buffer((64,), "float32"), var_1: T.Buffer((64,), "float32"), var_2: T.Buffer((64,), "float32"), var_shortcut: T.Buffer((64,), "float32"), gamma_0: T.Buffer((64,), "float32"), gamma_1: T.Buffer((64,), "float32"), gamma_2: T.Buffer((64,), "float32"), gamma_shortcut: T.Buffer((64,), "float32"), beta_0: T.Buffer((64,), "float32"), beta_1: T.Buffer((64,), "float32"), beta_2: T.Buffer((64,), "float32"), beta_shortcut: T.Buffer((64,), "float32"), relu: T.Buffer((3136, 256), "float32")):
+    def main(input: T.Buffer((3136, 64), "float32"), weights_0: T.Buffer((64, 64), "float32"), weights_1: T.Buffer((576, 64), "float32"), weights_2: T.Buffer((64, 256), "float32"), weights_shortcut: T.Buffer((64, 256), "float32"), mean_0: T.Buffer((64,), "float32"), mean_1: T.Buffer((64,), "float32"), mean_2: T.Buffer((256,), "float32"), mean_shortcut: T.Buffer((256,), "float32"), var_0: T.Buffer((64,), "float32"), var_1: T.Buffer((64,), "float32"), var_2: T.Buffer((256,), "float32"), var_shortcut: T.Buffer((256,), "float32"), gamma_0: T.Buffer((64,), "float32"), gamma_1: T.Buffer((64,), "float32"), gamma_2: T.Buffer((256,), "float32"), gamma_shortcut: T.Buffer((256,), "float32"), beta_0: T.Buffer((64,), "float32"), beta_1: T.Buffer((64,), "float32"), beta_2: T.Buffer((256,), "float32"), beta_shortcut: T.Buffer((256,), "float32"), relu: T.Buffer((3136, 256), "float32")):
         T.func_attr({"from_legacy_te_schedule": T.bool(True), "global_symbol": "main", "tir.noalias": T.bool(True)})
         relu_1 = T.allocate([1024], "float32", "global")
         reshape = T.allocate([9216], "float32", "global")
@@ -66,10 +66,10 @@ class Module:
             for i_inner, j_inner in T.grid(16, 16):
                 cse_var_9: T.int32 = j_outer * 16 + j_inner
                 cse_var_8: T.int32 = i_inner * 16 + j_inner
-                mean_2_1 = T.Buffer((64,), data=mean_2.data)
-                var_2_1 = T.Buffer((64,), data=var_2.data)
-                gamma_2_1 = T.Buffer((64,), data=gamma_2.data)
-                beta_2_1 = T.Buffer((64,), data=beta_2.data)
+                mean_2_1 = T.Buffer((256,), data=mean_2.data)
+                var_2_1 = T.Buffer((256,), data=var_2.data)
+                gamma_2_1 = T.Buffer((256,), data=gamma_2.data)
+                beta_2_1 = T.Buffer((256,), data=beta_2.data)
                 matmul_2[cse_var_8] = (matmul_1[cse_var_8] - mean_2_1[cse_var_9]) / T.sqrt(var_2_1[cse_var_9] + T.float32(1.0000000000000001e-05)) * gamma_2_1[cse_var_9] + beta_2_1[cse_var_9]
             relu_3 = T.Buffer((256,), data=relu_1)
             for i_inner_init, j_inner_init in T.grid(16, 16):
@@ -82,10 +82,10 @@ class Module:
             for i_inner, j_inner in T.grid(16, 16):
                 cse_var_12: T.int32 = j_outer * 16 + j_inner
                 cse_var_11: T.int32 = i_inner * 16 + j_inner
-                mean_shortcut_1 = T.Buffer((64,), data=mean_shortcut.data)
-                var_shortcut_1 = T.Buffer((64,), data=var_shortcut.data)
-                gamma_shortcut_1 = T.Buffer((64,), data=gamma_shortcut.data)
-                beta_shortcut_1 = T.Buffer((64,), data=beta_shortcut.data)
+                mean_shortcut_1 = T.Buffer((256,), data=mean_shortcut.data)
+                var_shortcut_1 = T.Buffer((256,), data=var_shortcut.data)
+                gamma_shortcut_1 = T.Buffer((256,), data=gamma_shortcut.data)
+                beta_shortcut_1 = T.Buffer((256,), data=beta_shortcut.data)
                 batch_normalization_1[cse_var_11] = (relu_3[cse_var_11] - mean_shortcut_1[cse_var_12]) / T.sqrt(var_shortcut_1[cse_var_12] + T.float32(1.0000000000000001e-05)) * gamma_shortcut_1[cse_var_12] + beta_shortcut_1[cse_var_12]
             matmul_3 = T.Buffer((256,), data=matmul)
             for i_inner, j_inner in T.grid(16, 16):
