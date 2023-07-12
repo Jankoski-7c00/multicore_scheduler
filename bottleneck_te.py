@@ -188,7 +188,7 @@ for x in range(4):
     
     no, ni = sch[bn[x]].split(n, factor=16)
     mo, mi = sch[bn[x]].split(m, factor=16)
-    #sch[bn[x]].reorder(no, mo, ni, mi)
+    sch[bn[x]].reorder(no, mo, ni, mi)
     #sch[x].tile(n, m, 16, 16)
     bn_axis.append(mo)
 
@@ -199,19 +199,20 @@ for x in range(3):
 
     no, ni = sch[relu[x]].split(n, factor=16)
     mo, mi = sch[relu[x]].split(m, factor=16)
-    #sch[relu[x]].reorder(no, mo, ni, mi)
+    sch[relu[x]].reorder(no, mo, ni, mi)
     relu_axis.append(mo)
     
 #最后一层的加法拆分
 n, m = output_add.op.axis
 no_, ni_ = sch[output_add].split(n, factor=16)
 mo_, mi_ = sch[output_add].split(m, factor=16)
-#sch[output_add].reorder(no, mo, ni, mi)
+sch[output_add].reorder(no_, mo_, ni_, mi_)
 
 #reshape拆分
 n, m = layer1.op.axis
 no_1, ni_1 = sch[layer1].split(n, factor=16)
 mo_1, mi_1 = sch[layer1].split(m, factor=16)
+sch[layer1].reorder(no_1, mo_1, ni_1, mi_1)
 
 #算子融合
 #bn和matmul融合
