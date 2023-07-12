@@ -35,17 +35,6 @@ def relu(data: te.Tensor) -> te.Tensor:
     relu = te.compute(data.shape, lambda i, j: te.max(data[i, j], 0), name = "relu")
     return relu
 
-#将bn和relu进行算子融合操作
-def fused_bn_relu(data: te.Tensor, mean: te.Tensor, var: te.Tensor, gamma: te.Tensor, beta: te.Tensor, epsilon = 1e-5):
-    assert len(data.shape) == 2, "The input data should be 2-D"
-    
-    normalized_data = te.compute(data.shape, lambda i, j: (data[i, j] - mean[j]) / te.sqrt(var[j] + epsilon), name = 'normalized_data')
-    bn_out = te.compute(data.shape, lambda i, j: normalized_data[i, j] * gamma[j] + beta[j], name = 'bn_out')
-
-    fused_bn_relu = te.compute(bn_out.shape, lambda a, b: te.max(data[a, b], 0), name = "relu")
-
-    return fused_bn_relu
-
 #reshape对应不同层间的数据整理，应交由加速器相应硬件去做，这里不代表实际数据排布情况，只用于说明数据排布会有转换
 def reshape(data: te.Tensor, next_kernel_size: tuple):
     assert len(data.shape) == 2, "The input data should be 2-D"
@@ -53,7 +42,7 @@ def reshape(data: te.Tensor, next_kernel_size: tuple):
     out_height = height
     out_width = width * next_kernel_size[0] * next_kernel_size[1]
 
-    output = te.compute((out_height,out_width), lambda i, j: data[i, j % (next_kernel_size[0] * next_kernel_size[1])])
+    output = te.compute((out_height,out_width), lambda i, j: data[i, j % (next_kernel_size[0] * next_kernel_size[1])], name = "reshape")
     return output
 
 #***********************    Bottleneck    ***********************#

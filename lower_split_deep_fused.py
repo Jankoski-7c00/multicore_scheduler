@@ -7,14 +7,14 @@ class Module:
     def main(input: T.Buffer((3136, 64), "float32"), weights_0: T.Buffer((64, 64), "float32"), weights_1: T.Buffer((576, 64), "float32"), weights_2: T.Buffer((64, 256), "float32"), weights_shortcut: T.Buffer((64, 256), "float32"), mean_0: T.Buffer((64,), "float32"), mean_1: T.Buffer((64,), "float32"), mean_2: T.Buffer((64,), "float32"), mean_shortcut: T.Buffer((64,), "float32"), var_0: T.Buffer((64,), "float32"), var_1: T.Buffer((64,), "float32"), var_2: T.Buffer((64,), "float32"), var_shortcut: T.Buffer((64,), "float32"), gamma_0: T.Buffer((64,), "float32"), gamma_1: T.Buffer((64,), "float32"), gamma_2: T.Buffer((64,), "float32"), gamma_shortcut: T.Buffer((64,), "float32"), beta_0: T.Buffer((64,), "float32"), beta_1: T.Buffer((64,), "float32"), beta_2: T.Buffer((64,), "float32"), beta_shortcut: T.Buffer((64,), "float32"), relu: T.Buffer((3136, 256), "float32")):
         T.func_attr({"from_legacy_te_schedule": T.bool(True), "global_symbol": "main", "tir.noalias": T.bool(True)})
         relu_1 = T.allocate([1024], "float32", "global")
-        compute = T.allocate([9216], "float32", "global")
+        reshape = T.allocate([9216], "float32", "global")
         matmul = T.allocate([256], "float32", "global")
         batch_normalization = T.allocate([256], "float32", "global")
         for i_outer, j_outer in T.grid(196, 16):
             input_1 = T.Buffer((200704,), data=input.data)
             relu_2 = T.Buffer((1024,), data=relu_1)
             for j_outer_1 in range(4):
-                compute_1 = T.Buffer((9216,), data=compute)
+                reshape_1 = T.Buffer((9216,), data=reshape)
                 for j_outer_2 in range(36):
                     matmul_1 = T.Buffer((144,), data=matmul)
                     for i_inner_init, j_inner_init in T.grid(16, 9):
@@ -36,14 +36,14 @@ class Module:
                         cse_var_3: T.int32 = i_inner * 9 + j_inner
                         matmul_3[cse_var_3] = T.max(matmul_2[cse_var_3], T.float32(0))
                     for i_inner, j_inner in T.grid(16, 16):
-                        compute_1[i_inner * 576 + j_outer_2 * 16 + j_inner] = matmul_3[i_inner * 9 + (j_outer_2 * 7 + j_inner) % 9]
+                        reshape_1[i_inner * 576 + j_outer_2 * 16 + j_inner] = matmul_3[i_inner * 9 + (j_outer_2 * 7 + j_inner) % 9]
                 matmul_1 = T.Buffer((256,), data=matmul)
                 for i_inner_init, j_inner_init in T.grid(16, 16):
                     matmul_1[i_inner_init * 16 + j_inner_init] = T.float32(0)
                 for k_outer, i_inner, j_inner, k_inner in T.grid(36, 16, 16, 16):
                     cse_var_4: T.int32 = i_inner * 16 + j_inner
                     weights_1_1 = T.Buffer((36864,), data=weights_1.data)
-                    matmul_1[cse_var_4] = matmul_1[cse_var_4] + compute_1[i_inner * 576 + k_outer * 16 + k_inner] * weights_1_1[k_outer * 1024 + k_inner * 64 + j_outer_1 * 16 + j_inner]
+                    matmul_1[cse_var_4] = matmul_1[cse_var_4] + reshape_1[i_inner * 576 + k_outer * 16 + k_inner] * weights_1_1[k_outer * 1024 + k_inner * 64 + j_outer_1 * 16 + j_inner]
                 matmul_2 = T.Buffer((256,), data=matmul)
                 for i_inner, j_inner in T.grid(16, 16):
                     cse_var_6: T.int32 = j_outer_1 * 16 + j_inner
