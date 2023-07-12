@@ -178,7 +178,7 @@ for x in range(4):
     mo, mi = sch[matmul[x]].split(m, factor=16)
     #sch[x].tile(n, m, 16, 16)
     ko, ki = sch[matmul[x]].split(k, factor=16)
-    #sch[matmul[x]].reorder(no, mo, ko, ni, mi, ki)
+    sch[matmul[x]].reorder(no, mo, ko, ni, mi, ki)
     matmul_axis.append(mo)
 
 #拆分bn
