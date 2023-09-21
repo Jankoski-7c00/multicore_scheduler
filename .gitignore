@@ -2,3 +2,5 @@
 /bottleneck_relay.py
 bottleneck.py
 lower_topi.py
+scheduler/.DS_Store
+scheduler/classes/.DS_Store
