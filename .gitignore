@@ -1,2 +1,4 @@
 /.DS_Store
 /bottleneck_relay.py
+bottleneck.py
+lower_topi.py
