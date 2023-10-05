@@ -29,11 +29,14 @@ def scheduler(accelerater: Accelerater, workload: DiGraph, strategy: str):
                 if cn.layer > best_CN.layer :
                     best_CN = cn
 
-        if strategy == 'Latency' :
+        elif strategy == 'Latency' :
             for cn in candidate_cn_table :
                 cn_start = core_idle_timetable[cn.core_allocation][3]
                 if cn_start < core_idle_timetable[best_CN.core_allocation][3] :
                     best_CN = cn
+
+        else:
+            raise ValueError('No such strategy.\n')
 
         #Step 3: upgrade core idle timetable
         core_id = best_CN.core_allocation
