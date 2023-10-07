@@ -98,7 +98,7 @@ class Core:
         else :
             load_time = self.move(tensor, source_buffer_name, buffer_name, isCopy = True)
 
-        return load_time
+        return load_time + destinaiton_buffer.cache_out(tensor)
 
     def runtime(self, CN: ComputationNode, off_chip: list):
         '''Simulate the operation of a CN and return latency'''

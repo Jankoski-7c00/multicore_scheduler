@@ -32,5 +32,12 @@ class CostModel :
             self.strategy = strategy
             self.scheduled_cn, self.memory_usage = scheduler(self.accelerater, self.workload ,self.strategy)
         else:
-            assert False, 'Wrong strategy.\n'
-        
+            raise ValueError('Wrong strategy.\n')
+
+    def set_core_allocation(self, core_allocation: list) :
+        for node in self.workload.nodes() :
+            id = node.node_ID
+            core_id = core_allocation[id]
+            node.set_core_allocation(core_id)
+
+        self.scheduled_cn, self.memory_usage = scheduler(self.accelerater, self.workload ,self.strategy)

@@ -8,7 +8,7 @@ class MemoryManager:
             memory_size: int, #Bytes
             load_latency: int = 2, #clk per byte
             store_latency: int = 2, #clk per byte
-            cache_latency: int = 1
+            cache_latency: int = 0
         ) -> None:
         self.memory_size = memory_size
         self.memory_used = 0

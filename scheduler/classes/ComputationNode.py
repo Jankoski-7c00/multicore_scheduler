@@ -30,11 +30,11 @@ class ComputationNode:
             raise ValueError("node_ID can only be set once.")
 
     def __hash__(self):
-        return hash((self.layer, self.op_type, self.tensor_fm, self.tensor_w, self.tensor_out))
+        return hash((self.layer, self.op_type, self.tensor_fm, self.tensor_w, self.tensor_out, self.node_ID))
 
     def __eq__(self, other):
         if isinstance(other, ComputationNode):
-            return self.layer == other.layer and self.op_type == other.op_type and self.tensor_fm == other.tensor_fm and self.tensor_w == other.tensor_w and self.tensor_out == other.tensor_out
+            return self.node_ID == other.node_ID and self.layer == other.layer and self.op_type == other.op_type and self.tensor_fm == other.tensor_fm and self.tensor_w == other.tensor_w and self.tensor_out == other.tensor_out
         return False
 
     def __repr__(self):
