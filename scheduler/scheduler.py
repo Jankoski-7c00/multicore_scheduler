@@ -1,10 +1,11 @@
 from classes import Accelerater
 from networkx import DiGraph
 
-def scheduler(accelerater: Accelerater, workload: DiGraph, strategy: str):
+def scheduler(accelerater: Accelerater, DIG: DiGraph, strategy: str):
     '''nothing'''
 
     #Step 0: initialize three tables
+    workload = DIG.copy()
     core_idle_timetable = []
     candidate_cn_table = []
     scheduled_cn_table = []

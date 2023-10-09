@@ -13,6 +13,7 @@ class GeneticAlgorithm:
         valid_allocations: list,
         population_size = 64,
         num_generations = 100,
+        pop: list = None,
         prob_crossover = 0.7,
         prob_mutate = 0.3,
         hof_num = 5
@@ -24,6 +25,12 @@ class GeneticAlgorithm:
         self.para_mu = int(self.population_size / 2) #number of individuals chosen from previous generation
         self.num_generations = num_generations #number of generations
         self.cost_model = cost_model
+        
+        if pop is None :
+            self.pop = []
+        else :
+            self.pop = pop #pre-set list of individuals
+        
         self.prob_crossover = prob_crossover #probability of crossover
         self.prob_mutate = prob_mutate #probability of mutation
 
@@ -50,9 +57,19 @@ class GeneticAlgorithm:
     def random_individual(self) :
         return [random.choice(self.valid_allocations) for _ in range(self.individual_length)]
     
-    def init_population(self) :
-        return self.toolbox.population(n = self.population_size)
-    
+    def init_population(self):
+        population = []
+
+        for ind in self.pop:
+            if len(population) >= self.population_size // 4:
+                break
+            population.append(ind)
+
+        rest_num = self.population_size - len(population)
+        population.extend(self.toolbox.population(n = rest_num))
+
+        return population
+
     def mutate(self, individual: list) :
         if random.random() < 0.5 :
             #randomly change one allocation

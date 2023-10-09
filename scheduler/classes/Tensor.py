@@ -5,11 +5,11 @@ class Tensor:
             self,
             datatype: str,
             size: int,
-            loop_dimensions: tuple = None,
-            loop_ranges: tuple = None,
+            loop_dimensions: tuple = None, #e.g. ('N', 'C', 'H', 'W')
+            loop_ranges: tuple = None, #e.g. ((0, 15), (16, 31), (32, 63), (64, 79))
             #origin: str = None, #whether the tensor comes from feature map, weights or output
-            producer = None,
-            consumer = None,
+            producer_layer = None,
+            consumer_layer = None,
             is_weight = False
         ) -> None:
         self.datatype = datatype
@@ -17,8 +17,8 @@ class Tensor:
         self.loop_dimensions = loop_dimensions
         self.loop_ranges = loop_ranges
         #self.origin = origin
-        self.producer = producer
-        self.consumer = consumer
+        self.producer_layer = producer_layer
+        self.consumer_layer = consumer_layer
         self.is_weight = is_weight
 
         #self.mem is the memory usage of the tensor
@@ -38,11 +38,11 @@ class Tensor:
     
     def __eq__(self, other):
         if isinstance(other, Tensor):
-            return self.datatype == other.datatype and self.size == other.size and self.loop_dimensions == other.loop_dimensions and self.loop_ranges == other.loop_ranges and self.producer == other.producer and self.consumer == other.consumer and self.is_weight == other.is_weight
+            return self.datatype == other.datatype and self.size == other.size and self.loop_dimensions == other.loop_dimensions and self.loop_ranges == other.loop_ranges and self.producer_layer == other.producer_layer and self.consumer_layer == other.consumer_layer and self.is_weight == other.is_weight
         return False
     
     def __hash__(self):
-        return hash((self.datatype, self.size, self.loop_dimensions, self.loop_ranges, self.producer, self.consumer, self.is_weight))
+        return hash((self.datatype, self.size, self.loop_dimensions, self.loop_ranges, self.producer_layer, self.consumer_layer, self.is_weight))
     
     def get_memory_usage(self) -> int:
         return self.mem

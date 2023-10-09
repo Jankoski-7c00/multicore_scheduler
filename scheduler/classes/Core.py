@@ -127,7 +127,7 @@ class Core:
 
             store_time += self.ve_output.cache_in(CN.tensor_out, off_chip)
         
-        elif CN.op_type == 'Relu' :
+        elif CN.op_type == 'Relu' or 'Add' or 'Sub':
             #load
             load_time += self.load(CN.tensor_fm, 've_bufferA')
             load_time += self.load(CN.tensor_w, 've_bufferB')
