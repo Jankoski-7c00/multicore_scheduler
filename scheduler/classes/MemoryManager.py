@@ -1,4 +1,4 @@
-from . import Tensor
+from classes.tensor import Tensor
 
 class MemoryManager:
     '''on-chip memory emulator'''
@@ -81,8 +81,10 @@ class MemoryManager:
     
     def cache_out(self, tensor) -> int:
         '''Load a tensor from on-chip memory to PE and return latency'''
-
-        return tensor.mem * self.cache_latency
+        if tensor is None:
+            return 0
+        else:
+            return tensor.mem * self.cache_latency
 
     def memory_usage(self) :
         return self.memory_used

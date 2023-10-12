@@ -1,6 +1,6 @@
-from . import ComputationNode
-from . import MemoryManager
-from . import Tensor
+from classes.computationNode import ComputationNode
+from classes.memoryManager import MemoryManager
+from classes.tensor import Tensor
 import math
 
 class Core:
@@ -18,12 +18,12 @@ class Core:
             ve_size: int = 256,
             ve_latency: int = 10, #clk
             on_chip_memory: int = 1, #Bytes
-            ve_bufferA: int = 100,
-            ve_bufferB: int = 100,
-            ve_output: int = 100,
-            gemm_Fmap: int = 100,
-            gemm_weights: int = 100,
-            gemm_output: int = 100,
+            ve_bufferA: int = 10240,
+            ve_bufferB: int = 10240,
+            ve_output: int = 10240,
+            gemm_Fmap: int = 10240,
+            gemm_weights: int = 10240,
+            gemm_output: int = 10240,
             transfer_latency:int = 10 #clk per byte
         ) -> None:
         self.core_id = core_id

@@ -3,7 +3,7 @@ from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
-from . import CostModel
+from scheduler.costModel import CostModel
 
 class GeneticAlgorithm:
     def __init__(

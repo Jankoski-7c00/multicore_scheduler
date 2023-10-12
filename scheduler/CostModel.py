@@ -1,6 +1,6 @@
-from classes import Accelerater
+from classes.accelerater import Accelerater
 from networkx import DiGraph
-from . import scheduler
+from scheduler import scheduler
 
 class CostModel :
     '''TODO: data visualization for the CN schedule and memory utilization.'''
@@ -14,7 +14,7 @@ class CostModel :
         self.workload = workload
         self.accelerater = accelerater
         self.strategy = strategy
-        self.scheduled_cn, self.memory_usage = scheduler(self.accelerater, self.workload ,self.strategy)
+        #self.scheduled_cn, self.memory_usage = scheduler(self.accelerater, self.workload ,self.strategy)
         
     def get_latency(self) :
         latency = 0

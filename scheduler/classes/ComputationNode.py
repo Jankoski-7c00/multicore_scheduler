@@ -38,7 +38,7 @@ class ComputationNode:
         return False
 
     def __repr__(self):
-        return f"ComputationNode(layer={self.layer}, op_type={self.op_type})"
+        return f"ComputationNode(layer={self.layer}, op_type={self.op_type}, ID={self.node_ID})"
     
     def set_core_allocation(self, core_id :int) ->None :
         self.core_allocation = core_id

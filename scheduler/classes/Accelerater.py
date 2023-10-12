@@ -1,4 +1,4 @@
-from . import ComputationNode
+from classes.computationNode import ComputationNode
 
 class Accelerater:
     '''emulator for a multi-core npu'''
@@ -16,7 +16,7 @@ class Accelerater:
             if core.core_id == CN.core_allocation :
                 if is_result:
                     runtime = core.runtime(CN, self.off_chip_memory)
-                    runtime += core.store_result(CN)
+                    runtime += core.store_result(CN, self.off_chip_memory)
                     return runtime
                 
                 else :
