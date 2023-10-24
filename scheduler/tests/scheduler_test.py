@@ -111,3 +111,6 @@ CM = CostModel(workload, acc)
 CM.set_core_allocation(core_allocation)
 for item in CM.scheduled_cn :
     print(item)
+
+for item in CM.memory_usage:
+    print(item)

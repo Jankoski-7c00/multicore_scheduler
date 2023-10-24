@@ -1,6 +1,6 @@
 from tvm import te
 import tvm
-
+from tvm.contrib import tedd
 #假设img2col以及对应的weights降维已经做好，处理的数据为2D
 def matmul(A: te.Tensor, B: te.Tensor) -> te.Tensor:
     assert A.shape[1] == B.shape[0]
@@ -223,8 +223,10 @@ sch[shortcut_bn].compute_at(sch[output_add], mo_)
 sch[layer2_bn].compute_at(sch[output_add], mo_)
 sch[output_add].compute_at(sch[output], relu_axis[2])
 
-print(tvm.lower(sch, [input, weights_0, weights_1, weights_2, weights_shortcut,
+mod = tvm.lower(sch, [input, weights_0, weights_1, weights_2, weights_shortcut,
                       mean_0, mean_1, mean_2, mean_shortcut,
                       var_0, var_1, var_2, var_shortcut,
                       gamma_0, gamma_1, gamma_2, gamma_shortcut,
-                      beta_0, beta_1, beta_2, beta_shortcut, output], simple_mode = True))
+                      beta_0, beta_1, beta_2, beta_shortcut, output], simple_mode = True)
+
+tedd.viz_dataflow_graph(sch,show_svg = True)
