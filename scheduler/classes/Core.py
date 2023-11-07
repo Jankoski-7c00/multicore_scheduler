@@ -18,6 +18,7 @@ class Core:
             ve_size: int = 256,
             ve_latency: int = 10, #clk
             on_chip_memory: int = 1, #Bytes
+            #below only used in NPU
             ve_bufferA: int = 10240,
             ve_bufferB: int = 10240,
             ve_output: int = 10240,

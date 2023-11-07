@@ -6,9 +6,9 @@ class ComputationNode:
             layer,
             op_type: str,
             core_allocation: int = 0,
-            tensor_fm = None,
-            tensor_w = None,
-            tensor_out = None
+            tensor_fm = [],
+            tensor_w = [],
+            tensor_out = []
         ) -> None:
         self.layer = layer
         self.op_type = op_type

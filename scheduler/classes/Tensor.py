@@ -3,8 +3,8 @@ class Tensor:
 
     def __init__(
             self,
-            datatype: str,
             size: int,
+            datatype: str = 'float32',
             loop_dimensions: tuple = None, #e.g. ('N', 'C', 'H', 'W')
             loop_ranges: tuple = None, #e.g. ((0, 15), (16, 31), (32, 63), (64, 79))
             #origin: str = None, #whether the tensor comes from feature map, weights or output
