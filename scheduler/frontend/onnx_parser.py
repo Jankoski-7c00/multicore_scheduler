@@ -211,6 +211,8 @@ class OnnxParser:
         for layer in self.layers:
             if tensor_name in layer['outputs']:
                 return layer
+            
+        return None
     
     def infer_input_shape(self, layer_name):
         '''通过上一层的输出来推断这一层的输入形状'''
@@ -279,8 +281,3 @@ class OnnxParser:
                 C_out = layer['conv_attributes']['output_channels']
                 layer['output_shapes'][0] = [N, C_out, H_out, W_out]
         return layer['output_shapes'][0]
-    
-
-model = onnx.load('/Users/xiangyy/Downloads/resnet18-v1-7.onnx')
-parser = OnnxParser(model)
-parser.show()

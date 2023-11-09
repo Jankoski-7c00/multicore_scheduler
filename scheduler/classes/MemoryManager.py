@@ -119,3 +119,8 @@ class MemoryManager:
             self.tensors.remove(tensor)
             self.memory_available += tensor.mem
             self.memory_used -= tensor.mem
+
+    def reset(self):
+        self.memory_used = 0
+        self.memory_available = self.memory_size - self.memory_used
+        self.tensors = []

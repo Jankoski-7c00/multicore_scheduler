@@ -3,7 +3,7 @@ from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
-from scheduler.costModel import CostModel
+from schedule_algorithm.costModel import CostModel
 
 class GeneticAlgorithm:
     def __init__(
@@ -12,7 +12,7 @@ class GeneticAlgorithm:
         cost_model: CostModel,
         valid_allocations: list,
         population_size = 64,
-        num_generations = 100,
+        num_generations = 64,
         pop: list = None,
         prob_crossover = 0.7,
         prob_mutate = 0.3,
@@ -60,15 +60,16 @@ class GeneticAlgorithm:
     def init_population(self):
         population = []
 
-        for ind in self.pop:
+        for ind_data in self.pop:
             if len(population) >= self.population_size // 4:
                 break
+            ind = creator.Individual(ind_data)
             population.append(ind)
-
         rest_num = self.population_size - len(population)
-        population.extend(self.toolbox.population(n = rest_num))
+        population.extend(self.toolbox.population(n=rest_num))
 
         return population
+
 
     def mutate(self, individual: list) :
         if random.random() < 0.5 :
@@ -101,3 +102,8 @@ class GeneticAlgorithm:
         )
 
         return self.hof
+
+    def save_hof_to_txt(self, filename='hof.txt'):
+        with open(filename, 'w') as file:
+            for individual in self.hof:
+                file.write(str(individual) + '\n')

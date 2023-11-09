@@ -6,16 +6,13 @@ class ComputationNode:
             layer,
             op_type: str,
             core_allocation: int = 0,
-            tensor_fm = [],
-            tensor_w = [],
-            tensor_out = []
         ) -> None:
         self.layer = layer
         self.op_type = op_type
         self.core_allocation = core_allocation
-        self.tensor_fm = tensor_fm
-        self.tensor_w = tensor_w
-        self.tensor_out = tensor_out
+        self.tensor_fm = []
+        self.tensor_w = []
+        self.tensor_out = []
         self.__node_ID = None
 
     @property
@@ -30,7 +27,7 @@ class ComputationNode:
             raise ValueError("node_ID can only be set once.")
 
     def __hash__(self):
-        return hash((self.layer, self.op_type, self.tensor_fm, self.tensor_w, self.tensor_out, self.node_ID))
+        return hash((self.layer, self.op_type, self.node_ID))
 
     def __eq__(self, other):
         if isinstance(other, ComputationNode):
@@ -38,7 +35,7 @@ class ComputationNode:
         return False
 
     def __repr__(self):
-        return f"ComputationNode(layer={self.layer}, op_type={self.op_type}, ID={self.node_ID})"
+        return f"ComputationNode(layer={self.layer}, op_type={self.op_type}, ID={self.node_ID})\ntensors_in = {self.tensor_fm}\ttensors_out = {self.tensor_out}"
     
     def set_core_allocation(self, core_id :int) ->None :
         self.core_allocation = core_id
