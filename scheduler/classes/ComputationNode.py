@@ -14,6 +14,19 @@ class ComputationNode:
         self.tensor_w = []
         self.tensor_out = []
         self.__node_ID = None
+        self.has_bias = False
+        if self.op_type == 'Conv' :
+            self.pads = None
+            self.strides = None
+        if self.op_type == 'MaxPool' :
+            self.pads = None
+            self.strides = None
+            self.kernel_shape = None
+        if self.op_type == 'Gemm' :
+            self.alpha = 1
+            self.beta = 1
+            self.transA = False
+            self.transB = True
 
     @property
     def node_ID(self) -> int:
@@ -31,11 +44,11 @@ class ComputationNode:
 
     def __eq__(self, other):
         if isinstance(other, ComputationNode):
-            return self.node_ID == other.node_ID and self.layer == other.layer and self.op_type == other.op_type and self.tensor_fm == other.tensor_fm and self.tensor_w == other.tensor_w and self.tensor_out == other.tensor_out
+            return self.node_ID == other.node_ID and self.layer == other.layer and self.op_type == other.op_type and self.tensor_fm == other.tensor_fm and self.tensor_w == other.tensor_w and self.tensor_out == other.tensor_out and self.has_bias == other.has_bias
         return False
 
     def __repr__(self):
-        return f"ComputationNode(layer={self.layer}, op_type={self.op_type}, ID={self.node_ID})\ntensors_in = {self.tensor_fm}\ttensors_out = {self.tensor_out}"
+        return f"ComputationNode(layer={self.layer}, op_type={self.op_type}, ID={self.node_ID})\ntensors_in = {self.tensor_fm}\ntensors_weight = {self.tensor_w}\ntensors_out = {self.tensor_out}"
     
     def set_core_allocation(self, core_id :int) ->None :
         self.core_allocation = core_id

@@ -18,11 +18,11 @@ class ComputationGraph :
         self.split_layers_dict = {layer['name']: layer['CN'] for layer in self.split_layers}
         self.generate_CN_DIG()
 
-
     def split_relu(self, layer, split_axis: str):
         if layer['op_type'] != 'Relu':
             raise ValueError(f"Wrong op type:{layer['op_type']}, expect: Relu")
         
+        #basic information
         N, C, H, W = layer['input_shapes'][0]
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']
@@ -31,6 +31,7 @@ class ComputationGraph :
         op = 'Relu'
         CNs = []
 
+        #split
         if split_axis == 'channel':
             if C%self.split_factor != 0 :
                 raise ValueError('wrong split factor')
@@ -40,14 +41,19 @@ class ComputationGraph :
                 split_c = i * a
                 loop_range = ((0, N-1), (split_c, split_c+a-1), (0, H-1), (0, W-1))
                 size = N*H*W*a
+                
+                #genatate tensor
                 tensor = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
+                
+                #genarate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor)
                 CN.tensor_out.append(tensor_out)
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
         
         elif split_axis == 'height':
@@ -59,14 +65,17 @@ class ComputationGraph :
                 split_h = i * a
                 loop_range = ((0, N-1), (0, C-1), (split_h, split_h+a-1), (0, W-1))
                 size = N*C*W*a
+
                 tensor = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
+
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor)
                 CN.tensor_out.append(tensor_out)
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
 
         else:
@@ -81,6 +90,7 @@ class ComputationGraph :
         if layer['op_type'] != 'BatchNormalization':
             raise ValueError(f"Wrong op type:{layer['op_type']}, expect: BatchNormalization")
         
+        #basic information
         N, C, H, W = layer['input_shapes'][0]
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']
@@ -100,9 +110,13 @@ class ComputationGraph :
                 loop_range_w = ((split_c, split_c+a-1), (split_c, split_c+a-1), (split_c, split_c+a-1), (split_c, split_c+a-1))
                 size = N*H*W*a
                 size_w = a*4
+
+                #generate tensor
                 tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
                 tensor_w = Tensor(size_w, loop_dimensions=w_dim, loop_ranges=loop_range_w, is_weight=True)
+
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor_in)
                 CN.tensor_w.append(tensor_w)
@@ -110,6 +124,7 @@ class ComputationGraph :
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
 
         elif split_axis == 'height':
@@ -122,9 +137,13 @@ class ComputationGraph :
                 split_h = i * a
                 loop_range = ((0, N-1), (0, C-1), (split_h, split_h+a-1), (0, W-1))
                 size = N*C*W*a
+
+                #generate tensor
                 tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
                 tensor_w = Tensor(size_w, loop_dimensions=w_dim, loop_ranges=loop_range_w, is_weight=True)
+                
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor_in)
                 CN.tensor_w.append(tensor_w)
@@ -132,6 +151,7 @@ class ComputationGraph :
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
         
         else:
@@ -146,6 +166,7 @@ class ComputationGraph :
         if layer['op_type'] != 'Add':
             raise ValueError(f"Wrong op type:{layer['op_type']}, expect: Add")
         
+        #basic information
         N, C, H, W = layer['input_shapes'][0]
         pre_layer_1 = self.parser.find_pre_layer(layer['inputs'][0])
         pre_layer_2 = self.parser.find_pre_layer(layer['inputs'][1])
@@ -165,9 +186,13 @@ class ComputationGraph :
                 split_c = i * a
                 loop_range = ((0, N-1), (split_c, split_c+a-1), (0, H-1), (0, W-1))
                 size = N*H*W*a
+
+                #generate tensor
                 tensor_1 = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer_1)
                 tensor_2 = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer_2)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
+
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor_1)
                 CN.tensor_fm.append(tensor_2)
@@ -175,6 +200,7 @@ class ComputationGraph :
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
         
         elif split_axis == 'height':
@@ -186,9 +212,13 @@ class ComputationGraph :
                 split_h = i * a
                 loop_range = ((0, N-1), (0, C-1), (split_h, split_h+a-1), (0, W-1))
                 size = N*C*W*a
+
+                #generate tensor
                 tensor_1 = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer_1)
                 tensor_2 = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer_2)
                 tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=consumer_layer)
+                
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor_1)
                 CN.tensor_fm.append(tensor_2)
@@ -196,6 +226,7 @@ class ComputationGraph :
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+
                 CNs.append(CN)
 
         else:
@@ -210,9 +241,11 @@ class ComputationGraph :
         if layer['op_type'] != 'Conv':
             raise ValueError(f"Wrong op type:{layer['op_type']}, expect: Conv")
         
+        #basic information
         N, C, H, W = layer['input_shapes'][0]
         N_out, C_out, H_out, W_out = layer['output_shapes'][0]
-        pad_h_top, _, pad_h_bottom, _ = layer['conv_attributes']['pads']
+        pad_h_top, pad_left, pad_h_bottom, pad_right = layer['conv_attributes']['pads']
+        strides = layer['conv_attributes']['strides']
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         if pre_layer == None:
             producer_layer = None
@@ -234,6 +267,7 @@ class ComputationGraph :
             for i in range(self.split_factor):
                 split_c = i * a
                 
+                #generate tensor
                 loop_range = ((0, N-1), (0, C-1), (0, H-1), (0, W-1))
                 size = N*H*W*C
                 tensor = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
@@ -246,6 +280,7 @@ class ComputationGraph :
                 loop_size_w = a*I*H_k*W_k
                 tensor_w = Tensor(loop_size_w, loop_dimensions=loop_dim_w, loop_ranges=loop_range_w, is_weight=True)
                 
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.tensor_fm.append(tensor)
                 CN.tensor_out.append(tensor_out)
@@ -253,6 +288,18 @@ class ComputationGraph :
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
                 CN.core_allocation = i
+                CN.pads = (pad_h_top, pad_left, pad_h_bottom, pad_right)
+                CN.strides = strides
+
+                #bias
+                if layer['conv_attributes']['has_bias'] == True :
+                    bias_dim = ('channel')
+                    bias_range = ((split_c, split_c+a-1))
+                    bias_size = a
+                    tensor_bias = Tensor(bias_size, loop_dimensions=bias_dim, loop_ranges=bias_range, is_weight=True)
+                    CN.tensor_w.append(tensor_bias)
+                    CN.has_bias = True
+
                 CNs.append(CN)
         
         elif split_axis == 'height':
@@ -263,6 +310,8 @@ class ComputationGraph :
             
             for i in range(self.split_factor):
                 split_h = i * a
+
+                #generate tensor
                 loop_range = ((0, N-1), (0, C-1), (max(split_h-pad_h_top, 0), min(split_h+a+pad_h_bottom-1, H-1)), (0, W-1))
                 size = N*C*W * (min(split_h+a+pad_h_bottom-1, H-1) - max(split_h-pad_h_top, 0) + 1)
                 tensor = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
@@ -276,6 +325,7 @@ class ComputationGraph :
                 loop_size_w = O*I*H_k*W_k
                 tensor_w = Tensor(loop_size_w, loop_dimensions=loop_dim_w, loop_ranges=loop_range_w, is_weight=True)
 
+                #generate CN
                 CN = ComputationNode(consumer_layer, op)
                 CN.node_ID = self.CN_num
                 self.CN_num = self.CN_num + 1
@@ -283,6 +333,25 @@ class ComputationGraph :
                 CN.tensor_out.append(tensor_out)
                 CN.tensor_w.append(tensor_w)
                 CN.core_allocation = i
+                CN.strides = strides
+                if loop_range[2][0] == 0:
+                    if loop_range[2][1] == H-1:
+                        CN.pads = (pad_h_top, pad_left, pad_h_bottom, pad_right)
+                    else :
+                        CN.pads = (pad_h_top, pad_left, 0, pad_right)
+                elif loop_range[2][1] == H-1:
+                    CN.pads = (0, pad_left, pad_h_bottom, pad_right)
+                else :
+                    CN.pads = (0, pad_left, 0, pad_right)
+
+                #bias
+                if layer['conv_attributes']['has_bias'] == True :
+                    bias_dim = ('channel')
+                    bias_range = ((0, O))
+                    bias_size = O
+                    tensor_bias = Tensor(bias_size, loop_dimensions=bias_dim, loop_ranges=bias_range, is_weight=True)
+                    CN.tensor_w.append(tensor_bias)
+                    CN.has_bias = True
                 
                 CNs.append(CN)
 
@@ -298,49 +367,136 @@ class ComputationGraph :
         if layer['op_type'] != 'MaxPool':
             raise ValueError(f"Wrong op type:{layer['op_type']}, expect: MaxPool")
         
+        #basic information
         N, C, H, W = layer['input_shapes'][0]
-        size_in = N*C*H*W
+        #size_in = N*C*H*W
         N_out, C_out, H_out, W_out = layer['output_shapes'][0]
-        size_out = N_out*C_out*H_out*W_out
+        pad_h_top, pad_left, pad_h_bottom, pad_right = layer['maxpool_attributes']['pads']
+        strides = layer['maxpool_attributes']['strides']
+        kernel_shape = layer['maxpool_attributes']['kernel_shape']
+        #size_out = N_out*C_out*H_out*W_out
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']
         consumer_layer = layer['name']
         loop_dim = ('N', 'C', 'H', 'W')
-        tensor_in = Tensor(size_in, loop_dimensions=loop_dim, loop_ranges=((0, N-1), (0, C-1), (0, H-1), (0, W-1)), producer_layer=producer_layer)
-        tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=((0, N_out-1), (0, C_out-1), (0, H_out-1), (0, W_out-1)), producer_layer=consumer_layer)
-        CN =ComputationNode(consumer_layer, op_type='MaxPool')
-        CN.tensor_fm.append(tensor_in)
-        CN.tensor_out.append(tensor_out)
-        CN.node_ID = self.CN_num
-        self.CN_num = self.CN_num + 1
-        CN.core_allocation = 0
-        CNs = [CN]
+        op = 'MaxPool'
+        CNs = []
+
+        if split_axis == 'channel' :
+            if C_out%self.split_factor != 0:
+                raise ValueError('wrong split factor')
+            a = C // self.split_factor
+            for i in range(self.split_factor):
+                split_c = i*a
+
+                #generate tensor
+                loop_range = ((0, N-1), (split_c, split_c + a - 1), (0, H-1), (0, W-1))
+                size = N*a*H*W
+                tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
+
+                loop_range_out = ((0, N_out-1), (split_c, split_c+a-1), (0, H_out-1), (0, W_out-1))
+                size = N_out*a*H_out*W_out
+                tensor_out = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range_out, producer_layer=consumer_layer)
+
+                #generate CN
+                CN = ComputationNode(consumer_layer, op)
+                CN.tensor_fm.append(tensor_in)
+                CN.tensor_out.append(tensor_out)
+                CN.node_ID = self.CN_num
+                self.CN_num = self.CN_num + 1
+                CN.core_allocation = i
+                CN.pads = (pad_h_top, pad_left, pad_h_bottom, pad_right)
+                CN.strides = strides
+                CN.kernel_shape = kernel_shape
+
+                CNs.append(CN)
+
+        if split_axis == 'height' :
+            if H%self.split_factor != 0 and H_out%self.split_factor != 0:
+                raise ValueError('wrong split factor')
+            a = H // self.split_factor
+            b = H_out // self.split_factor
+
+            for i in range(self.split_factor):
+                split_h = i*a
+                
+                #generate tensor
+                loop_range = ((0, N-1), (0, C-1), (max(split_h-pad_h_top, 0), min(split_h+a+pad_h_bottom-1, H-1)), (0, W-1))
+                size = N*C*W * (min(split_h+a+pad_h_bottom-1, H-1) - max(split_h-pad_h_top, 0) + 1)
+                tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
+
+                split_h_out = i*b
+                loop_range_out = ((0, N_out-1), (0, C_out-1), (split_h_out, split_h_out+b-1), (0, W_out-1))
+                size_out = N_out*b*C_out*W_out
+                tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=loop_range_out, producer_layer=consumer_layer)
+
+                #generate CN
+                CN = ComputationNode(consumer_layer, op)
+                CN.tensor_fm.append(tensor_in)
+                CN.tensor_out.append(tensor_out)
+                CN.node_ID = self.CN_num
+                self.CN_num = self.CN_num + 1
+                CN.core_allocation = i
+                CN.strides = strides
+                CN.kernel_shape = kernel_shape
+                if loop_range[2][0] == 0:
+                    if loop_range[2][1] == H-1:
+                        CN.pads = (pad_h_top, pad_left, pad_h_bottom, pad_right)
+                    else :
+                        CN.pads = (pad_h_top, pad_left, 0, pad_right)
+                elif loop_range[2][1] == H-1:
+                    CN.pads = (0, pad_left, pad_h_bottom, pad_right)
+                else :
+                    CN.pads = (0, pad_left, 0, pad_right)
+
+                CNs.append(CN)
+
+        else:
+            raise ValueError('wrong split_axis.')
+
         split_layer = {}
         split_layer['name'] = consumer_layer
         split_layer['CN'] = CNs
         return split_layer
 
     def split_global_average_pool(self, layer, split_axis: str):
-        if layer['op_type'] != 'GlobalAveragePool':
-            raise ValueError(f"Wrong op type:{layer['op_type']}, expect: GlobalAveragePool")
         
         N, C, H, W = layer['input_shapes'][0]
-        size_in = N*C*H*W
+        #size_in = N*C*H*W
         N_out, C_out, H_out, W_out = layer['output_shapes'][0]
-        size_out = N_out*C_out*H_out*W_out
+        #size_out = N_out*C_out*H_out*W_out
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']
         consumer_layer = layer['name']
         loop_dim = ('N', 'C', 'H', 'W')
-        tensor_in = Tensor(size_in, loop_dimensions=loop_dim, loop_ranges=((0, N-1), (0, C-1), (0, H-1), (0, W-1)), producer_layer=producer_layer)
-        tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=((0, N_out-1), (0, C_out-1), (0, H_out-1), (0, W_out-1)), producer_layer=consumer_layer)
-        CN =ComputationNode(consumer_layer, op_type='GlobalAveragePool')
-        CN.tensor_fm.append(tensor_in)
-        CN.tensor_out.append(tensor_out)
-        CN.node_ID = self.CN_num
-        self.CN_num = self.CN_num + 1
-        CN.core_allocation = 0
-        CNs = [CN]
+        CNs =[]
+        op = 'GlobalAveragePool'
+
+        if C_out%self.split_factor != 0:
+            raise ValueError('wrong split factor')
+        a = C // self.split_factor
+        for i in range(self.split_factor):
+            split_c = i * a
+
+            #generate tensor
+            loop_range = ((0, N-1), (split_c, split_c+a-1), (0, H-1), (0, W-1))
+            size = N*a*H*W
+            tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
+
+            loop_range_out = ((0, N_out-1), (split_c, split_c+a-1), (0, H_out-1), (0, W_out-1))
+            size_out = N_out*a*H_out*W_out
+            tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=loop_range_out, producer_layer=consumer_layer)
+            
+            #generate CN
+            CN = ComputationNode(consumer_layer, op)
+            CN.tensor_fm.append(tensor_in)
+            CN.tensor_out.append(tensor_out)
+            CN.node_ID = self.CN_num
+            self.CN_num = self.CN_num+1
+            CN.core_allocation = i
+
+            CNs.append(CN)
+
         split_layer = {}
         split_layer['name'] = consumer_layer
         split_layer['CN'] = CNs
@@ -374,37 +530,134 @@ class ComputationGraph :
         return split_layer
     
     def split_gemm(self, layer, split_axis: str):
-        if layer['op_type'] != 'Gemm':
-            raise ValueError(f"Wrong op type:{layer['op_type']}, expect: Gemm")
-        
+        #basic information
         H, W = layer['input_shapes'][0]
-        size_in = H*W
-        H_out, W_out = layer['output_shapes'][0]
-        size_out = H_out*W_out
+        H_w, W_w = layer['input_shapes'][1]
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']
         consumer_layer = layer['name']
         loop_dim = ('H', 'W')
-        tensor_in = Tensor(size_in, loop_dimensions=loop_dim, loop_ranges=((0, H-1), (0, W-1)), producer_layer=producer_layer)
-        tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=((0, H_out-1), (0, W_out-1)), producer_layer=consumer_layer)
-
-        H_w, W_w = layer['input_shapes'][1]
-        size_w = H_w*W_w
-        tensor_w = Tensor(size_w, loop_dimensions=loop_dim, loop_ranges=((0, H_w-1), (0, W_w-1)), is_weight=True)
-        
-        CN =ComputationNode(consumer_layer, op_type='Gemm')
-        CN.tensor_fm.append(tensor_in)
-        CN.tensor_out.append(tensor_out)
-        CN.tensor_w.append(tensor_w)
-
+        H_out, W_out = layer['output_shapes'][0]
+        op = 'Gemm'
+        CNs = []
         if layer['attributes']['has_bias'] is True :
             bias_size = layer['input_shapes'][2][0]
-            tensor_bias = Tensor(bias_size, loop_dimensions=('W'), loop_ranges=((0, bias_size-1)), is_weight=True)
-            CN.tensor_w.append(tensor_bias)
-        CN.node_ID = self.CN_num
-        self.CN_num = self.CN_num + 1
-        CN.core_allocation = 0
-        CNs = [CN]
+
+        if split_axis == 'channel':
+            #if B is transposed, split h
+            if layer['attributes']['transB'] == 0:
+                if W_w%self.split_factor != 0:
+                    raise ValueError('wrong split factor')
+            else:
+                if H_w%self.split_factor != 0:
+                    raise ValueError('wrong split factor')
+
+            #A remains the same
+            loop_range = ((0, H-1), (0, W-1))
+            size = H*W
+            tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
+            
+            #if B is transposed, split h
+            if layer['attributes']['transB'] == 0:
+                a = W_w // self.split_factor
+            else :
+                a = H_w // self.split_factor
+
+            for i in range(self.split_factor) :
+                split_c = a*i
+                if layer['attributes']['transB'] == 0:#B is not transposed. split W
+                    loop_w = ((0, H_w-1), (split_c, split_c+a-1))
+                    size_w = H_w*a
+                else :
+                    loop_w = ((split_c, split_c+a-1), (0, W_w-1))
+                    size_w = W_w*a 
+                tensor_w = Tensor(size_w, loop_dimensions=loop_dim, loop_ranges=loop_w, is_weight=True)
+
+                loop_out = ((0, H_out-1), (split_c, split_c+a-1))
+                size_out = H_out*a
+                tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=loop_out, producer_layer=consumer_layer)
+
+                #generate CN
+                CN = ComputationNode(consumer_layer, op)
+                CN.tensor_fm.append(tensor_in)
+                CN.tensor_out.append(tensor_out)
+                CN.tensor_w.append(tensor_w)
+                CN.node_ID = self.CN_num
+                self.CN_num = self.CN_num + 1
+                CN.core_allocation = i
+                CN.alpha = layer['attributes']['alpha']
+                CN.beta = layer['attributes']['beta']
+                if layer['attributes']['transA'] == 1:
+                    CN.transA = True
+                if layer['attributes']['transB'] == 0:
+                    CN.transB = False
+                if layer['attributes']['has_bias'] is True :
+                    split_bias = (bias_size//self.split_factor)*i
+                    loop_bias = ((split_bias, split_bias + bias_size//self.split_factor - 1),)
+                    size_bias = bias_size//self.split_factor
+                    tensor_bias = Tensor(size_bias, loop_dimensions=('W'), loop_ranges=loop_bias, is_weight=True)
+                    CN.tensor_w.append(tensor_bias)
+                    CN.has_bias = True
+                
+                CNs.append(CN)
+        
+        elif split_axis == 'height':
+            #if A is transposed, split W
+            if layer['attributes']['transA'] == 0:
+                if H%self.split_factor != 0:
+                    raise ValueError('wrong split factor')
+            else:
+                if W%self.split_factor != 0:
+                    raise ValueError('wrong split factor')
+            loop_w = ((0, H_w-1), (0, W_w-1))
+            size_w = H_w*W_w
+            tensor_w = Tensor(size_w, loop_dimensions=loop_dim, loop_ranges=loop_w, is_weight=True)
+            if layer['attributes']['has_bias'] is True :
+                loop_bias = ((0, bias_size - 1),)
+                tensor_bias = Tensor(bias_size, loop_dimensions=('W'), loop_ranges=loop_bias, is_weight=True)
+            
+            if layer['attributes']['transA'] == 0:#A is not transposed, split H
+                h = H // self.split_factor
+            else:
+                h = W // self.split_factor
+
+            for i in range(self.split_factor):
+                split_h = h * i
+                if layer['attributes']['transA'] == 0:#A is not transposed
+                    loop_range = ((split_h, split_h + h - 1), (0, W-1))
+                    size = h*W
+                else :
+                    loop_range = ((0, H-1), (split_h, split_h + h -1))
+                    size = h*H
+                tensor_in = Tensor(size, loop_dimensions=loop_dim, loop_ranges=loop_range, producer_layer=producer_layer)
+
+                loop_out = ((split_h, split_h + h - 1), (0, W_out-1))
+                size_out = h*W_out
+                tensor_out = Tensor(size_out, loop_dimensions=loop_dim, loop_ranges=loop_out, producer_layer=consumer_layer)
+
+                #generate CN
+                CN = ComputationNode(consumer_layer, op)
+                CN.tensor_fm.append(tensor_in)
+                CN.tensor_out.append(tensor_out)
+                CN.tensor_w.append(tensor_w)
+                CN.node_ID = self.CN_num
+                self.CN_num = self.CN_num + 1
+                CN.core_allocation = i
+                CN.alpha = layer['attributes']['alpha']
+                CN.beta = layer['attributes']['beta']
+                if layer['attributes']['transA'] == 1:
+                    CN.transA = True
+                if layer['attributes']['transB'] == 0:
+                    CN.transB = False
+                if layer['attributes']['has_bias'] is True :
+                    CN.tensor_w.append(tensor_bias)
+                    CN.has_bias = True
+
+                CNs.append(CN)
+        
+        else :
+            raise ValueError("Wrong split axis.")
+        
         split_layer = {}
         split_layer['name'] = consumer_layer
         split_layer['CN'] = CNs
@@ -433,6 +686,7 @@ class ComputationGraph :
             elif layer['op_type'] == 'Flatten':
                 split_layers.append(self.split_flatten(layer, split_axis))
             elif layer['op_type'] == 'Gemm':
+                split_axis = 'channel'
                 split_layers.append(self.split_gemm(layer, split_axis))
             else :
                 raise ValueError(f"wrong op type: {layer['op_type']}")
@@ -440,6 +694,7 @@ class ComputationGraph :
         return split_layers
     
     def generate_CN_DIG(self):
+        '''Generate a split computation graph.'''
         for split_layer in self.split_layers:
             for cn in split_layer['CN']:
                 self.CN_graph.add_node(cn)

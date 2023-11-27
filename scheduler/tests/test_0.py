@@ -34,6 +34,22 @@ def generate_workflow(scheduled_cn_map, file_name = 'workflow'):
     plt.savefig(file_path)
     plt.close()
 
+def generate_memoryuse(memory_usage, file_name = 'memory_usage'):
+    end_times, memories = zip(*memory_usage)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(end_times, memories)
+
+    plt.title('Memory Usage')
+    plt.xlabel('Time')
+    plt.ylabel('Memory')
+    plt.legend(['Memory Usage'])
+
+    plt.grid(True)
+    file_path = f'./results/{file_name}.png'
+    plt.savefig(file_path)
+    plt.close()
+
 #model = onnx.load('/Users/xiangyy/Downloads/resnet50-v1-12.onnx')
 model = onnx.load('/Users/xiangyy/Downloads/resnet18-v1-7.onnx')
 parser = OnnxParser(model)
@@ -44,14 +60,32 @@ individual_length = DIG.number_of_nodes()
 cm = CostModel(DIG, system)
 scheduled_cn_map = cm.scheduled_cn_map
 print(cm.get_latency())
-generate_workflow(scheduled_cn_map, file_name='before')
+generate_workflow(scheduled_cn_map, file_name='before_18')
+generate_memoryuse(cm.memory_usage, file_name='mem_before_18')
 default = cm.get_core_allocation()
 #cm.print_scheduled_cn()
+#print(cm.get_core_allocation())
 
 ga = GeneticAlgorithm(individual_length, cm, [0,1,2,3], pop = [default])
+#ga = GeneticAlgorithm(individual_length, cm, [0,1,2,3])
 hof = ga.run()
-ga.save_hof_to_txt()
+#ga.save_hof_to_txt()
 cm.set_core_allocation(hof[0])
 scheduled_cn_map = cm.scheduled_cn_map
 print(cm.get_latency())
-generate_workflow(scheduled_cn_map, file_name='after')
+print(cm.get_core_allocation())
+generate_workflow(scheduled_cn_map, file_name='after_new')
+generate_memoryuse(cm.memory_usage, file_name='mem_after_new')
+'''
+cm.set_core_allocation(hof[1])
+scheduled_cn_map = cm.scheduled_cn_map
+print(cm.get_latency())
+generate_workflow(scheduled_cn_map, file_name='after_50_1')
+generate_memoryuse(cm.memory_usage, file_name='mem_afer_50_1')
+
+cm.set_core_allocation(hof[2])
+scheduled_cn_map = cm.scheduled_cn_map
+print(cm.get_latency())
+generate_workflow(scheduled_cn_map, file_name='after_50_2')
+generate_memoryuse(cm.memory_usage, file_name='mem_afer_50_2')
+'''

@@ -12,6 +12,9 @@ class CostModel :
         ) -> None:
         self.workload = workload
         self.accelerater = accelerater
+        core_allocation = [x % self.accelerater.gpu_num for x in self.get_core_allocation()]
+        self.set_core_allocation(core_allocation)
+        self.accelerater.reset()
         self.scheduled_cn_map, self.memory_usage = list_scheduling_algorithm(self.workload, self.accelerater)
         
     def get_latency(self) :

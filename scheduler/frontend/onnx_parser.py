@@ -66,8 +66,8 @@ class OnnxParser:
             elif attr.name == 'momentum':
                 attributes['momentum'] = attr.f
 
-        # 假设scale, B, mean, var是通过inputs来提供的
-        # scale, B, mean, var对应的是layer.input[1], layer.input[2], layer.input[3], layer.input[4]
+        #scale, B, mean, var是通过inputs来提供的
+        #scale, B, mean, var对应的是layer.input[1], layer.input[2], layer.input[3], layer.input[4]
         if len(layer.input) > 1:
             scale_name = layer.input[1]
             attributes['scale'] = self.get_tensor_shape(scale_name)
@@ -87,13 +87,13 @@ class OnnxParser:
         '''提取卷积层的特定属性'''
         attributes = {}
         for attr in layer.attribute:
-            # 检查卷积核形状
+            #检查卷积核形状
             if attr.name == 'kernel_shape':
                 attributes['kernel_shape'] = attr.ints
-            # 检查步长
+            #检查步长
             elif attr.name == 'strides':
                 attributes['strides'] = attr.ints
-            # 检查填充
+            #检查填充
             elif attr.name == 'pads':
                 attributes['pads'] = attr.ints
 
@@ -189,7 +189,7 @@ class OnnxParser:
 
         #添加边
         for layer in self.layers:
-            #对于每个输出，查找下一个层的输入，并创建一条边
+            #对于每个输出，查找下一个层的输入，创建边
             for output in layer['outputs']:
                 #查找所有使用此输出作为输入的层
                 next_layers = self.find_next_layers(output)
@@ -199,7 +199,7 @@ class OnnxParser:
         return graph
 
     def find_next_layers(self, tensor_name):
-        # 查找下一个层（tensor_name作为输入的层）
+        #找下一层（tensor_name作为输入的层）
         next_layers = []
         for layer in self.layers:
             if tensor_name in layer['inputs']:
@@ -207,7 +207,7 @@ class OnnxParser:
         return next_layers
     
     def find_pre_layer(self, tensor_name):
-        # 查找上一个层（tensor_name作为输入的层）
+        #查找上一层（tensor_name作为输入的层）
         for layer in self.layers:
             if tensor_name in layer['outputs']:
                 return layer
@@ -218,9 +218,9 @@ class OnnxParser:
         '''通过上一层的输出来推断这一层的输入形状'''
         layer = self.layers_dict[layer_name]
         if layer['input_shapes'][0] is None:
-            # Find the previous layer based on the input tensor name
+            #Find the previous layer based on the input tensor name
             pre_layer = self.find_pre_layer(layer['inputs'][0])
-            # Ensure the previous layer is found
+            #Ensure the previous layer is found
             if pre_layer is not None:
                 layer['input_shapes'][0] = self.infer_output_shape(pre_layer['name'])
                 if layer['op_type'] == 'Add':

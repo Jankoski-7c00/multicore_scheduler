@@ -11,7 +11,7 @@ class MultiGPU:
             gpu_num: int,
             compute_latency: dict,
             gpu_memory: int = 4 * 1024 * 1024 * 1024,
-            transfer_latency: int = 2
+            transfer_latency: int = 1
         ) -> None:
         self.gpu_num = gpu_num
         self.compute_latency = compute_latency

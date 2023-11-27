@@ -46,3 +46,10 @@ class Tensor:
     
     def get_memory_usage(self) -> int:
         return self.mem
+    
+    def get_shape(self):
+        shape = []
+        for loop_range in self.loop_ranges:
+            i = loop_range[1] - loop_range[0] + 1
+            shape.append(i)
+        return tuple(shape)
