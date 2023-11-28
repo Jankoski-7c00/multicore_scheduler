@@ -245,7 +245,7 @@ class ComputationGraph :
         N, C, H, W = layer['input_shapes'][0]
         N_out, C_out, H_out, W_out = layer['output_shapes'][0]
         pad_h_top, pad_left, pad_h_bottom, pad_right = layer['conv_attributes']['pads']
-        strides = layer['conv_attributes']['strides']
+        strides = tuple(layer['conv_attributes']['strides'])
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         if pre_layer == None:
             producer_layer = None
@@ -372,8 +372,8 @@ class ComputationGraph :
         #size_in = N*C*H*W
         N_out, C_out, H_out, W_out = layer['output_shapes'][0]
         pad_h_top, pad_left, pad_h_bottom, pad_right = layer['maxpool_attributes']['pads']
-        strides = layer['maxpool_attributes']['strides']
-        kernel_shape = layer['maxpool_attributes']['kernel_shape']
+        strides = tuple(layer['maxpool_attributes']['strides'])
+        kernel_shape = tuple(layer['maxpool_attributes']['kernel_shape'])
         #size_out = N_out*C_out*H_out*W_out
         pre_layer = self.parser.find_pre_layer(layer['inputs'][0])
         producer_layer = pre_layer['name']

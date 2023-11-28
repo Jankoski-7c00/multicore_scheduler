@@ -30,6 +30,8 @@ class OnnxParser:
                 layer_info['attributes'] = self.parse_gemm_attributes(layer)
             elif layer.op_type == 'BatchNormalization':
                 layer_info['batchnorm_attributes'] = self.parse_batchnorm_attributes(layer)
+                self.epsilon = layer_info['batchnorm_attributes']['epsilon']
+                self.momentum = layer_info['batchnorm_attributes']['momentum']
             self.layers.append(layer_info)
 
         self.layers_dict = {layer['name']: layer for layer in self.layers}
