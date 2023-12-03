@@ -4,3 +4,7 @@ bottleneck.py
 lower_topi.py
 scheduler/.DS_Store
 scheduler/classes/.DS_Store
+scheduler/backend/.DS_Store
+scheduler/frontend/.DS_Store
+scheduler/schedule_algorithm/.DS_Store
+scheduler/tests/.DS_Store
